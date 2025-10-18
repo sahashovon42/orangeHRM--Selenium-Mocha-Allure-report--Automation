@@ -1,0 +1,29 @@
+
+___________For Allure Mocha report (packet.json Scripts)___________
+
+//for only run a file 
+
+"test:dashboard": "mocha tests/dashboard.test.js",
+
+
+//for allure report
+
+    "test:login": "mocha tests/login.test.js --timeout 60000 --exit --reporter allure-mocha",
+    "allure:generate": "npx allure generate \"allure-results\" --clean -o \"allure-report\"",
+    "allure:open": "npx allure open \"allure-report\""
+
+//Generate and open the report:
+# generate (creates allure-report/)
+npm run allure:generate
+
+# open in browser
+npm run allure:open
+
+#Or (for this project)
+allure open allure-report
+
+# if previously generated, clean 1st with this command
+allure generate allure-results --clean -o allure-report
+
+
+___________##___________

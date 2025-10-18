@@ -1,0 +1,7 @@
+node_modules/
+allure-report/
+allure report files/
+allure-report.zip
+*.log
+.DS_Store
+otherfile.txt
