@@ -1,0 +1,7 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","14548","Empty credentials Error","OrangeHRM - Login tests","Thu Oct 16 03:35:13 BDT 2025","passed","Thu Oct 16 03:35:27 BDT 2025","","","",""
+"","20405","Should login with valid credentials and reach Dashboard","OrangeHRM - Login tests","Thu Oct 16 03:34:12 BDT 2025","passed","Thu Oct 16 03:34:33 BDT 2025","","","",""
+"","16745","Should have widgets (like “Time at Work”, “My Actions”, “Quick Launch”)","OrangeHRM - Dashboard tests","Thu Oct 16 03:36:02 BDT 2025","passed","Thu Oct 16 03:36:19 BDT 2025","","","",""
+"","22147","Invalid credentials Error","OrangeHRM - Login tests","Thu Oct 16 03:34:51 BDT 2025","passed","Thu Oct 16 03:35:13 BDT 2025","","","",""
+"","17601","Should logout and back to login page","OrangeHRM - Login tests","Thu Oct 16 03:34:33 BDT 2025","passed","Thu Oct 16 03:34:50 BDT 2025","","","",""
+"","18243","Verify user profile dropdown (top-right) contains expected options.","OrangeHRM - Dashboard tests","Thu Oct 16 03:36:19 BDT 2025","passed","Thu Oct 16 03:36:37 BDT 2025","","","",""
