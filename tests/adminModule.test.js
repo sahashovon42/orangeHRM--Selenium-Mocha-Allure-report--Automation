@@ -7,7 +7,7 @@ import { buildDriver } from "../utils/driver.js";
 import fs from "fs";
 import { sleep } from "../utils/helpers.js";
 import { getRandomNumber } from "../utils/randomNumber.js";
-import { getRandomNumberMax } from "../utils/randomNumber.js";
+//import { getRandomNumberMax } from "../utils/randomNumber.js";
 import { generatePassword } from "../utils/password.js";
 //import credentials from "../utils/credentials.json" assert { type: "json" };
 import path from "path";
@@ -17,7 +17,7 @@ const credentialsData = JSON.parse(fs.readFileSync(credentialsPath, "utf-8"));
 
 
 describe("OrangeHRM - Admin Module tests", function () {
-    this.timeout(60000); // mocha timeout
+    this.timeout(120000); // mocha timeout
 
     let driver;
     //https://opensource-demo.orangehrmlive.com/
@@ -109,10 +109,11 @@ describe("OrangeHRM - Admin Module tests", function () {
 
     //________________Add new user___________________//
 
-    it("Add and verify new user", async () => {
+    it("Add , Search, Edit & Delete new user with verify every steps", async () => {
+        //enter URL
         await driver.get(baseUrl);
-
-        await sleep(3000);
+        await sleep(2000);
+        
         //username
         const usernameInput = await driver.wait(until.elementLocated(By.xpath("//input[@name='username']")), 10000);
         await usernameInput.sendKeys(credentialsData.user_pass.USER);
@@ -185,7 +186,7 @@ describe("OrangeHRM - Admin Module tests", function () {
 
         //Username
         const textuser = selectedName.replace(/\s+/g, '').toLowerCase(); //remove spaces and make lowercase
-        const cleanName = textuser.substring(0, 5);
+        const cleanName = textuser.substring(0, 5); //first 5 letter
         const randomUserNum = Math.floor(Math.random() * 9999) + 1; // random number between 1 and 999
         console.log(`\nGenerated username is ${cleanName}${randomUserNum}`);
         const newUsername = `${cleanName}${randomUserNum}`;
@@ -196,9 +197,9 @@ describe("OrangeHRM - Admin Module tests", function () {
 
 
         //password 
-        const firstName = selectedName.split(" ")[0];
+        //const firstName = textuser.split(" ")[0]; // take first part of the name
 
-        const password = generatePassword(firstName);
+        const password = generatePassword(newUsername);
         console.log("\nGenerated password:", password);
 
         // Set password and confirm password fields
@@ -211,32 +212,101 @@ describe("OrangeHRM - Admin Module tests", function () {
         const saveButton = await driver.findElement(By.xpath("//button[@type='submit']"));
         await saveButton.click();
         //await sleep(1000);
-        //await driver.findElement(By.xpath("//button[@type='submit']")).click();
 
         //verify success message
         const toastLocator = By.css('.oxd-toast.oxd-toast--success');
         await driver.wait(until.elementLocated(toastLocator), 10000);
         const toast = await driver.findElement(toastLocator);
         const text = await toast.getText();
-        const successMsg = text.replace("Success","").replace("×","").trim();// remove(×)remove the close icon. [trim()] remove spaces/newlines
+        const successMsg = text.replace("Success", "").replace("×", "").trim();// remove(×)remove the close icon. [trim()] remove spaces/newlines
 
         expect(successMsg).to.equal('Successfully Saved');
 
-        //verify users exist
-        // const users = await driver.findElements(By.xpath("(//div[@role='rowgroup'])[2]/div"));
 
-        // console.log(`\nTotal ${users.length} users found`);
+        //Search user by username
+        await driver.wait(until.elementLocated(By.xpath("//h5[contains(@class,'oxd-text oxd-text--h5 oxd-table-filter-title')]")), 10000);
 
-        // for (let i = 0; i < users.length; i++) {
-        //     const text = await users[i].getText();
-        //     console.log(`${i + 1}. ${text}`);
-        // }
+        await driver.findElement(By.xpath("(//input[contains(@class,'oxd-input oxd-input--active')])[2]")).sendKeys(newUsername);
+        await sleep(2000);
+        await driver.findElement(By.xpath("//button[@type='submit']")).click();
+        await sleep(3000);
 
-        // const totalUser = await driver.findElement(By.xpath("//span[@class='oxd-text oxd-text--span']")).getText();
-        // const num = totalUser.replace(" (", "", ") Records Found"); // (17) Records Found
-        // const getNum = parseFloat(num);
 
-        // expect(users.length).to.equal(getNum);
+        //verify results
+        await driver.wait(until.elementLocated(By.xpath("(//div[@role='row'])[2]/div[2]")), 10000);
+        const expectedUser = await driver.findElement(By.xpath("(//div[@role='row'])[2]/div[2]")).getText(); //record username
+
+        expect(expectedUser).to.equal(newUsername);
+
+        //edit user
+        await driver.findElement(By.xpath("(//button[contains(@class,'oxd-icon-button oxd-table-cell-action-space')])[2]")).click(); //press edit icon
+        await sleep(2000);
+        await driver.wait(until.elementLocated(By.xpath("//h6[contains(@class,'oxd-text oxd-text--h6 orangehrm-main-title')]")), 10000);//wait for Edit User page load
+        const currentStatus = await driver.findElement(By.xpath("(//div[contains(@class,'oxd-select-wrapper')])[2]")).getText();
+        const textStatus = "Enabled";
+
+        if (currentStatus == textStatus) {
+            await driver.findElement(By.xpath("(//div[contains(@class,'oxd-select-wrapper')])[2]")).click();
+            await sleep(2000);
+
+            await driver.findElement(By.xpath("(//div[@role='listbox']/div)[3]")).click();
+            await sleep(2000);
+        }
+        else {
+            await driver.findElement(By.xpath("(//div[contains(@class,'oxd-select-wrapper')])[2]")).click();
+            await sleep(2000);
+
+            await driver.findElement(By.xpath("(//div[@role='listbox']/div)[2]")).click();
+            await sleep(2000);
+        }
+
+        await driver.findElement(By.xpath("//button[@type='submit']")).click();
+
+
+        //_____Delete user
+        //Search user by username
+        await driver.wait(until.elementLocated(By.xpath("//h5[contains(@class,'oxd-text oxd-text--h5 oxd-table-filter-title')]")), 10000);//system user
+
+        await driver.findElement(By.xpath("(//input[contains(@class,'oxd-input oxd-input--active')])[2]")).sendKeys(newUsername);
+        await sleep(2000);
+        await driver.findElement(By.xpath("//button[@type='submit']")).click();
+        await sleep(3000);
+
+
+        //delete user
+        await driver.wait(until.elementLocated(By.xpath("(//div[@role='row'])[2]/div[2]")), 10000);
+        await driver.findElement(By.xpath("(//button[contains(@class,'oxd-icon-button oxd-table-cell-action-space')])[1]")).click(); //press delete icon
+        await driver.wait(until.elementLocated(By.xpath("//div[contains(@class,'orangehrm-modal-header')]")), 10000);//wait for "Are you Sure?" delete pop-uo
+
+        await driver.findElement(By.xpath("//button[contains(@class,'oxd-button oxd-button--medium oxd-button--label-danger orangehrm-button-margin')]")).click(); //confirm delete pop-up
+        await sleep(2000);
+
+        //verify delete success message
+        const toastLocator2 = By.css('.oxd-toast.oxd-toast--success');
+        await driver.wait(until.elementLocated(toastLocator2), 10000);
+        const toast2 = await driver.findElement(toastLocator2);
+        const text2 = await toast2.getText();
+        const successMsgDelete = text2.replace("Success", "").replace("×", "").trim();// remove(×)remove the close icon. [trim()] remove spaces/newlines
+
+        expect(successMsgDelete).to.equal('Successfully Deleted');
+
+        //____confirm the record is removed
+        await driver.wait(until.elementLocated(By.xpath("//h5[contains(@class,'oxd-text oxd-text--h5 oxd-table-filter-title')]")), 10000);//system user
+
+        await driver.findElement(By.xpath("(//input[contains(@class,'oxd-input oxd-input--active')])[2]")).sendKeys(newUsername); //enter deleted username
+        await sleep(2000);
+        await driver.findElement(By.xpath("//button[@type='submit']")).click();
+        await sleep(3000);
+
+        //verify deleted user has no records
+        const toastLocator3 = By.css('.oxd-toast.oxd-toast--info');
+        await driver.wait(until.elementLocated(toastLocator3), 10000);
+        const toast3 = await driver.findElement(toastLocator3);
+        const text3 = await toast3.getText();
+        const infoMsg = text3.replace("Info", "").replace("×", "").trim();// remove(×)remove the close icon. [trim()] remove spaces/newlines
+
+        expect(infoMsg).to.equal('No Records Found');
+
     });
 
 
